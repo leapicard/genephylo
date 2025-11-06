@@ -74,22 +74,24 @@ workflow PIPELINE_INITIALISATION {
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
+        // .map {
+        //     meta, fastafile, treefile ->
+        //         if (!treefile) {
+        //             //return [ meta.gene, meta + [ treefile:true ], [ fastafile ] ]
+        //             return [ meta + [ fasta:true ],  [ fastafile ] ]
+        //         } else {
+        //             //return [ meta.gene, meta + [ treefile:false ], [ fastafile, treefile ] ]
+        //             return [ meta + [ fasta:true ], [ fastafile, treefile ] ]
+        //         }
+        // }
+        // .groupTuple()
+        //.map { samplesheet ->
+        //     validateInputSamplesheet(samplesheet)
+        // }
+        // .map {
+        //     meta, fastas ->
+        //         return [ meta, fastas.flatten() ]
+        // }
         .set { ch_samplesheet }
 
     emit:
@@ -261,4 +263,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-

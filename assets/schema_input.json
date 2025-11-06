@@ -7,27 +7,27 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "errorMessage": "Gene name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "fastafile": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.fas(ta)?$",
+                "errorMessage": "Fasta file containing at least 1 sequence must be provided, cannot contain spaces and must have extension '.fas' or '.fasta'"
             },
-            "fastq_2": {
+            "treefile": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.txt$",
+                "errorMessage": "Phylogenetic tree file cannot contain spaces and must have extension '.txt'"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["id", "fastafile"]
     }
 }

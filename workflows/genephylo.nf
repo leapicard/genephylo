@@ -9,6 +9,7 @@ include { BLAST_UPDATEBLASTDB } from '../modules/nf-core/blast/updateblastdb/mai
 include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
 include { BLAST_BLASTN } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_TBLASTN } from '../modules/nf-core/blast/tblastn/main'
+include { EXTRACT_ACCESSIONS} from '../modules/local/extract_accessions'
 include { BLAST_BLASTDBCMD } from '../modules/nf-core/blast/blastdbcmd/main'
 include { SEQKIT_RMDUP } from '../modules/nf-core/seqkit/rmdup/main'
 
@@ -111,9 +112,13 @@ workflow GENEPHYLO {
 		}
 
 		// extract sequences
-		ch_extract_in = ch_blast_out.map { meta, batch_file ->
+		ch_blastres_in = ch_blast_out.map { meta, batch_file ->
 			tuple(meta, null, batch_file)
 		}
+
+		EXTRACT_ACCESSIONS(ch_blastres_in.first())
+
+		ch_extract_in = EXTRACT_ACCESSIONS.out.accessions
 		
 		// WORKS
 		BLAST_BLASTDBCMD(ch_extract_in, ch_blastdb_in)

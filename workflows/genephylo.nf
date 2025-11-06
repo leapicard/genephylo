@@ -111,14 +111,13 @@ workflow GENEPHYLO {
 
 		}
 
-		// extract sequences
-		// ch_blastres_in = ch_blast_out.map { meta, batch_file ->
-		// 	tuple(meta, null, batch_file)
-		// }
-
+		// get the first column of the blast results file
 		EXTRACT_ACCESSIONS(ch_blast_out.first())
 
-		ch_extract_in = EXTRACT_ACCESSIONS.out.accessions
+		ch_accessions = EXTRACT_ACCESSIONS.out.accessions
+		ch_extract_in = ch_accessions.map { meta, batch_file ->
+			tuple(meta, null, batch_file)
+		}
 		
 		// WORKS
 		BLAST_BLASTDBCMD(ch_extract_in, ch_blastdb_in)

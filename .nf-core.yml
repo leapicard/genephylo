@@ -1,16 +1,12 @@
+nf_core_version: 2.14.1
 repository_type: pipeline
-
-nf_core_version: 3.2.0
-
-lint: {}
-
 template:
-  org: nf-core
-  name: genephylo
+  author: Lea Picard
   description: This pipeline retrieves orthologous gene sequences and construct codon-aware
     analyses and phylogenetic trees
-  author: Lea Picard
-  version: 1.0.0dev
   force: true
-  outdir: .
   is_nfcore: true
+  name: genephylo
+  org: nf-core
+  outdir: .
+  version: 1.0.0dev

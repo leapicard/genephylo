@@ -11,7 +11,7 @@ process EXTRACT_ACCESSIONS {
     tuple val(meta), path(blastres)
 
     output:
-    tuple val(meta), path("${prefix}_accessions.txt"), emit: accessions
+    tuple val(meta), null, path("${prefix}_accessions.txt"), emit: accessions
 
     when:
     task.ext.when == null || task.ext.when

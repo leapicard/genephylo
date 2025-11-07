@@ -112,10 +112,10 @@ workflow GENEPHYLO {
 		}
 
 		// get the first column of the blast results file
-		EXTRACT_ACCESSIONS(ch_blast_out.first())
+		EXTRACT_ACCESSIONS(ch_blast_out)
 
-		ch_accessions = EXTRACT_ACCESSIONS.out.accessions
-		ch_extract_in = ch_accessions.map { meta, batch_file ->
+		ch_accessions_out = EXTRACT_ACCESSIONS.out.accessions
+		ch_extract_in = ch_accessions_out.map { meta, batch_file ->
 			tuple(meta, null, batch_file)
 		}
 		

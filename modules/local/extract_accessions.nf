@@ -20,5 +20,10 @@ process EXTRACT_ACCESSIONS {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     gawk '{print \$1}' "$blastres" > "${prefix}_accessions.txt"
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        gawk version: \$(gawk --version | head -n 1 | cut -d',' -f1 | cut -d' ' -f3)
+    END_VERSIONS
     """
 }

@@ -51,13 +51,8 @@ def make_code(scname):
         return (toks[0][:3] + toks[1][:2] + toks[2][:1]).upper()
     return "".join(toks)[:6].upper()
 
-def fetch_taxid_to_name_ete3(taxids):
-    ncbi = NCBITaxa()
-    try:
-        ncbi.get_taxid_translator([1])  # test query
-    except Exception:
-        print("Taxonomy database missing. Downloading...")
-        ncbi.update_taxonomy_database()
+def fetch_taxid_to_name_ete3(taxids, dbpath):
+    ncbi = NCBITaxa(dbfile=dbpath)
     return ncbi.get_taxid_translator(taxids)
 
 # ----- Main -----
@@ -66,6 +61,7 @@ def main():
     parser.add_argument("--taxidmap", required=True)
     parser.add_argument("--input", required=True)
     parser.add_argument("--prefix", required=True)
+    parser.add_argument("--workdir", required=True)
     args = parser.parse_args()
 
     out_fasta = f"{args.prefix}_renamed.fasta"

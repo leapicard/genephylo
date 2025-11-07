@@ -25,10 +25,12 @@ process BLAST_FILTER {
     # Set up writable environment for ete3
     export HOME=\$PWD
     export XDG_CACHE_HOME=\$PWD/.cache
+
+    echo "HOLA"
     
     # Create necessary directories
     mkdir -p .cache .etetoolkit
-    
+
     rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}"
 
     cat <<-END_VERSIONS > versions.yml

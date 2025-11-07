@@ -23,11 +23,13 @@ process BLAST_FILTER {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     # Set up writable environment for ete3
-    #export HOME=\$PWD
-    #export XDG_CACHE_HOME=\$PWD/.cache
+    export HOME=\$PWD
+    export XDG_DATA_HOME=\$PWD/.local/share
+    export XDG_CONFIG_HOME=\$PWD/.config
+    export XDG_CACHE_HOME=\$PWD/.cache
     
     # Create necessary directories
-    #mkdir -p .cache .etetoolkit
+    mkdir -p .local/share .config .cache .etetoolkit
 
     rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --workdir \$PWD
 

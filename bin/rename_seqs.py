@@ -60,10 +60,10 @@ def main():
     parser.add_argument("--workdir", required=True)
     args = parser.parse_args()
 
-    dbpath = f"{args.workdir}/taxa.sqlite"
-    print(dbpath)
-    ncbi = NCBITaxa(dbfile = dbpath).update_taxonomy_database()
-    
+    #dbpath = f"{args.workdir}/taxa.sqlite"
+    #ncbi = NCBITaxa(dbfile = dbpath).update_taxonomy_database()
+    ncbi = NCBITaxa()
+
     out_fasta = f"{args.prefix}_renamed.fasta"
     out_codes = f"{args.prefix}_speciescodes.txt"
 

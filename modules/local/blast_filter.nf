@@ -22,9 +22,6 @@ process BLAST_FILTER {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    export ETE3PATH="\${PWD}/.etetoolkit"
-    mkdir -p "\$ETE3PATH"
-
     rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}"
 
     cat <<-END_VERSIONS > versions.yml

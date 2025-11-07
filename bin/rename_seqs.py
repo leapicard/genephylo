@@ -3,6 +3,7 @@ import argparse
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Bio import SeqIO, Entrez
+from Bio.Entrez.Parser import DataHandler
 
 # ----- Helpers -----
 def load_taxid_map(path):
@@ -63,8 +64,12 @@ def main():
     parser.add_argument("--input", required=True, help="Input FASTA file")
     parser.add_argument("--prefix", required=True, help="Output prefix for renamed FASTA and species codes")
     parser.add_argument("--email", help="Email for NCBI Entrez (recommended)")
+    parser.add_argument("--workdir", required=False, help="Writable directory for DTD files")
     parser.add_argument("--threads", type=int, default=4, help="Number of threads for Entrez queries")
     args = parser.parse_args()
+
+    if args.workdir:
+        DataHandler.local_dtd_dir = args.workdir
 
     # Configure Entrez
     Entrez.email = args.email or ""

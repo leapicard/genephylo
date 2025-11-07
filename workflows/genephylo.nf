@@ -117,6 +117,8 @@ workflow GENEPHYLO {
 		EXTRACT_ACCESSIONS( ch_blast_out )
 
 		ch_accessions_out = EXTRACT_ACCESSIONS.out.accessions
+		ch_versions = ch_versions.mix(EXTRACT_ACCESSIONS.out.versions)
+
 		ch_extract_in = ch_accessions_out.map { meta, batch_file ->
 			tuple(meta, null, batch_file)
 		}
@@ -135,6 +137,7 @@ workflow GENEPHYLO {
 		BLAST_FILTER(ch_rmdup, ch_blast_out)
 
 		ch_aln_in = BLAST_FILTER.out.fasta
+		ch_versions = ch_versions.mix(BLAST_FILTER.out.versions)
 
 		// SUBWORKFLOW: phylo
 		//

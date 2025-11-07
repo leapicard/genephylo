@@ -4,14 +4,17 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// BLAST - make a subworkflow?
+// BLAST database - make a subworkflow?
 include { BLAST_UPDATEBLASTDB } from '../modules/nf-core/blast/updateblastdb/main'
 include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
+
+// initial phylogeny
 include { BLAST_BLASTN } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_TBLASTN } from '../modules/nf-core/blast/tblastn/main'
-include { EXTRACT_ACCESSIONS} from '../modules/local/extract_accessions'
+include { EXTRACT_ACCESSIONS } from '../modules/local/extract_accessions'
 include { BLAST_BLASTDBCMD } from '../modules/nf-core/blast/blastdbcmd/main'
 include { SEQKIT_RMDUP } from '../modules/nf-core/seqkit/rmdup/main'
+include { BLAST_FILTER } from '../modules/local/blast_filter'
 
 // ALIGN AND TREE - make a subworkflow?
 include { MAFFT_ALIGN } from '../modules/nf-core/mafft/align/main'
@@ -42,7 +45,6 @@ workflow GENEPHYLO {
 
 		ch_blastdb_in = channel.empty()
 		ch_blastdb = channel.empty()
-		ch_taxdb = tuple( [ id: "taxdb" ], "taxdb" )
 
 		// 1. download from ncbi databases (update)
 		// WORKS
@@ -112,7 +114,8 @@ workflow GENEPHYLO {
 		}
 
 		// get the first column of the blast results file
-		EXTRACT_ACCESSIONS(ch_blast_out)
+		ch_blast_out.into { ch_accessions_in; ch_taxidmap }
+		EXTRACT_ACCESSIONS(ch_accessions_in)
 
 		ch_accessions_out = EXTRACT_ACCESSIONS.out.accessions
 		ch_extract_in = ch_accessions_out.map { meta, batch_file ->
@@ -127,8 +130,12 @@ workflow GENEPHYLO {
 
 		SEQKIT_RMDUP(ch_extract_out)
 
-		ch_aln_in = SEQKIT_RMDUP.out.fastx
+		ch_rmdup = SEQKIT_RMDUP.out.fastx
 		ch_versions = ch_versions.mix(SEQKIT_RMDUP.out.versions)
+
+		BLAST_FILTER(ch_rmdup, ch_taxidmap)
+
+		ch_aln_in = BLAST_FILTER.out.fasta
 
 		// SUBWORKFLOW: phylo
 		//

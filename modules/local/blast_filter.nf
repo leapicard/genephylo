@@ -35,7 +35,7 @@ process BLAST_FILTER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ete3: \$(ete3 version | cut -d' ' -f1)
+        ete3: \$(python -c "import ete3; print(ete3.__version__)")
     END_VERSIONS
     """
 }

@@ -31,14 +31,11 @@ process BLAST_BLASTDBCMD {
     }
     def extension  = args.contains("-outfmt") && !args.contains("-outfmt %f") ? "txt" : "fasta"
     """
-    DB=`find -L ./ -name "*.nhr" | sed 's/\\.nhr\$//'`
+    DB=`find -L ./ -name "*.nal" | sed 's/\\.nal\$//'`
     if test -z "\$DB"
     then
-        DB=`find -L ./ -name "*.phr" | sed 's/\\.phr\$//'`
+        DB=`find -L ./ -name "*.pal" | sed 's/\\.pal\$//'`
     fi
-
-    DB=\${DB%%\$'\n'*}
-    DB=\${DB%.[0-9]*}
 
     blastdbcmd \\
         -db \$DB \\

@@ -4,11 +4,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// BLAST database - make a subworkflow?
+// BLAST database
 include { BLAST_UPDATEBLASTDB } from '../modules/nf-core/blast/updateblastdb/main'
 include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
 
-// initial phylogeny
+// retrieve sequences
 include { BLAST_BLASTN } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_TBLASTN } from '../modules/nf-core/blast/tblastn/main'
 include { BLAST_EXTRACT } from '../modules/local/blast_extract'
@@ -16,7 +16,7 @@ include { BLAST_BLASTDBCMD } from '../modules/nf-core/blast/blastdbcmd/main'
 include { SEQKIT_RMDUP } from '../modules/nf-core/seqkit/rmdup/main'
 include { BLAST_FILTER } from '../modules/local/blast_filter'
 
-// ALIGN AND TREE - make a subworkflow?
+// ALIGN AND TREE
 include { MAFFT_ALIGN } from '../modules/nf-core/mafft/align/main'
 include { IQTREE } from '../modules/nf-core/iqtree/main'
 
@@ -153,13 +153,13 @@ workflow GENEPHYLO {
 		ch_iqtree_out = IQTREE.out.phylogeny
 		ch_versions = ch_versions.mix(IQTREE.out.versions)
 
-		// softwareVersionsToYAML(ch_versions)
-		// 		.collectFile(
-		// 				storeDir: "${params.outdir}/pipeline_info",
-		// 				name: 'nf_core_'  +  'genephylo_software_'  + 'mqc_'  + 'versions.yml',
-		// 				sort: true,
-		// 				newLine: true
-		// 		).set { ch_collated_versions }
+		softwareVersionsToYAML(ch_versions)
+				.collectFile(
+						storeDir: "${params.outdir}/pipeline_info",
+						name: 'nf_core_'  +  'genephylo_software_'  + 'mqc_'  + 'versions.yml',
+						sort: true,
+						newLine: true
+				).set { ch_collated_versions }
 
 
 		emit:

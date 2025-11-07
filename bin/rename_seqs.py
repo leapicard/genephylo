@@ -62,7 +62,7 @@ def main():
 
     dbpath = f"{args.workdir}/taxa.sqlite"
     print(dbpath)
-    ncbi = NCBITaxa(dbfile = dbpath)
+    ncbi = NCBITaxa(dbfile = dbpath).update_taxonomy_database()
     
     out_fasta = f"{args.prefix}_renamed.fasta"
     out_codes = f"{args.prefix}_speciescodes.txt"

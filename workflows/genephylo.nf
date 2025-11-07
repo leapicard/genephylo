@@ -114,8 +114,7 @@ workflow GENEPHYLO {
 		}
 
 		// get the first column of the blast results file
-		ch_blast_out.into { ch_accessions_in; ch_taxidmap }
-		EXTRACT_ACCESSIONS(ch_accessions_in)
+		EXTRACT_ACCESSIONS( ch_blast_out )
 
 		ch_accessions_out = EXTRACT_ACCESSIONS.out.accessions
 		ch_extract_in = ch_accessions_out.map { meta, batch_file ->
@@ -133,7 +132,7 @@ workflow GENEPHYLO {
 		ch_rmdup = SEQKIT_RMDUP.out.fastx
 		ch_versions = ch_versions.mix(SEQKIT_RMDUP.out.versions)
 
-		BLAST_FILTER(ch_rmdup, ch_taxidmap)
+		BLAST_FILTER(ch_rmdup, ch_blast_out)
 
 		ch_aln_in = BLAST_FILTER.out.fasta
 

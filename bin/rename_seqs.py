@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-import time
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import Bio
-from Bio import SeqIO, Entrez
-from Bio.Entrez.Parser import DataHandler
+from ete3 import NCBITaxa
 
 # ----- Helpers -----
 def load_taxid_map(path):
@@ -13,37 +9,37 @@ def load_taxid_map(path):
     with open(path, "r", encoding="utf-8") as fh:
         return {parts[0]: parts[1] for parts in (line.strip().split("\t") for line in fh)}
 
-def chunked(iterable, n):
-    it = iter(iterable)
-    while True:
-        chunk = []
-        try:
-            for _ in range(n):
-                chunk.append(next(it))
-        except StopIteration:
-            if chunk:
-                yield chunk
-            break
-        yield chunk
-
-def fetch_taxid_to_name(taxids):
-    """Fetch scientific names for given taxids using NCBI Entrez."""
-    ids = ",".join(taxids)
-    handle = Entrez.esummary(db="taxonomy", id=ids)
-    records = Entrez.read(handle)
-    return {str(rec.get("Id")): rec.get("ScientificName") or rec.get("TaxId") or "" for rec in records}
+def parse_fasta(path):
+    """Simple FASTA parser: yields (header, sequence)."""
+    header, seq = None, []
+    with open(path, "r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith(">"):
+                if header:
+                    yield header, "".join(seq)
+                header = line[1:]
+                seq = []
+            else:
+                seq.append(line)
+        if header:
+            yield header, "".join(seq)
 
 def extract_gene(desc):
+    """Extract gene name from FASTA description."""
     parts = desc.split("[gene=", 1)
     return parts[1].split("]", 1)[0] if len(parts) > 1 else "unknowngene"
 
 def make_code(scname):
+    """Generate species code from scientific name."""
     if not scname:
         return ""
     toks = scname.strip().split()
     n = len(toks)
     lower = [t.lower() for t in toks]
-    if n > 3 and 'x' in lower:
+    if n > 3 and 'x' in lower:  # hybrid case
         i = lower.index('x')
         left = toks[max(0, i-2):i]
         right = toks[i+1:i+3]
@@ -59,28 +55,24 @@ def make_code(scname):
         return (toks[0][:3] + toks[1][:2] + toks[2][:1]).upper()
     return "".join(toks)[:6].upper()
 
+def fetch_taxid_to_name_ete3(taxids):
+    """Fetch scientific names for given taxids using ETE3 NCBITaxa."""
+    ncbi = NCBITaxa()
+    # Ensure taxonomy DB is present
+    try:
+        ncbi.get_taxid_translator([1])  # test query
+    except Exception:
+        print("Taxonomy database missing. Downloading...")
+        ncbi.update_taxonomy_database()
+    return ncbi.get_taxid_translator(taxids)
+
 # ----- Main -----
 def main():
-    parser = argparse.ArgumentParser(description="Rename FASTA headers using taxid mapping and species codes.")
+    parser = argparse.ArgumentParser(description="Rename FASTA headers using taxid mapping and species codes (ETE3).")
     parser.add_argument("--taxidmap", required=True, help="Tab-delimited file: seqid<TAB>taxid")
     parser.add_argument("--input", required=True, help="Input FASTA file")
     parser.add_argument("--prefix", required=True, help="Output prefix for renamed FASTA and species codes")
-    parser.add_argument("--email", help="Email for NCBI Entrez (recommended)")
-    parser.add_argument("--workdir", required=False, help="Writable directory for DTD files")
-    parser.add_argument("--threads", type=int, default=4, help="Number of threads for Entrez queries")
     args = parser.parse_args()
-
-    if args.workdir:
-        dtd_dir = os.path.join(args.workdir, "dtds")
-        os.makedirs(dtd_dir, exist_ok=True)
-        # Copy DTD files from Biopython installation
-        src_dtd_dir = os.path.join(os.path.dirname(Bio.__file__), "Entrez", "DTDs")
-        for fname in os.listdir(src_dtd_dir):
-            shutil.copy(os.path.join(src_dtd_dir, fname), dtd_dir)
-        DataHandler.local_dtd_dir = dtd_dir
-
-    # Configure Entrez
-    Entrez.email = args.email or ""
 
     out_fasta = f"{args.prefix}_renamed.fasta"
     out_codes = f"{args.prefix}_speciescodes.txt"
@@ -91,23 +83,17 @@ def main():
     # Collect taxids from FASTA
     taxids_needed = set()
     seqid_to_taxid = {}
-    for rec in SeqIO.parse(args.input, "fasta"):
-        tid = taxid_map.get(rec.id)
-        seqid_to_taxid[rec.id] = tid or ""
+    fasta_records = []
+    for header, seq in parse_fasta(args.input):
+        seqid = header.split()[0]
+        tid = taxid_map.get(seqid)
+        seqid_to_taxid[seqid] = tid or ""
         if tid:
             taxids_needed.add(tid)
+        fasta_records.append((header, seq))
 
-    # Fetch taxid -> scientific name in parallel
-    taxid_to_name = {}
-    chunks = list(chunked(list(taxids_needed), 50))  # 50 per request
-    with ThreadPoolExecutor(max_workers=args.threads) as executor:
-        futures = {executor.submit(fetch_taxid_to_name, chunk): chunk for chunk in chunks}
-        for future in as_completed(futures):
-            try:
-                taxid_to_name.update(future.result())
-            except Exception as e:
-                print(f"Error fetching chunk {futures[future]}: {e}")
-            time.sleep(0.34)  # respect NCBI rate limits globally
+    # Fetch taxid -> scientific name using ETE3
+    taxid_to_name = fetch_taxid_to_name_ete3([int(t) for t in taxids_needed if t.isdigit()])
 
     # Build species codes
     species_codes = {}
@@ -115,11 +101,11 @@ def main():
     connector = "|"
 
     with open(out_fasta, "w", encoding="utf-8") as fh_out:
-        for rec in SeqIO.parse(args.input, "fasta"):
-            seqid = rec.id
-            gene = extract_gene(rec.description)
+        for header, seq in fasta_records:
+            seqid = header.split()[0]
+            gene = extract_gene(header)
             tid = seqid_to_taxid.get(seqid, "")
-            scname = taxid_to_name.get(tid, "")
+            scname = taxid_to_name.get(int(tid), "") if tid.isdigit() else ""
             code_base = make_code(scname) if scname else (tid or "UNK")
 
             if scname:
@@ -140,8 +126,8 @@ def main():
                 code = code_base
                 species_codes[scname] = code
 
-            header = f"{code}{connector}{gene}{connector}{seqid}"
-            fh_out.write(f">{header}\n{rec.seq}\n")
+            new_header = f"{code}{connector}{gene}{connector}{seqid}"
+            fh_out.write(f">{new_header}\n{seq}\n")
 
     # Write species codes file
     with open(out_codes, "w", encoding="utf-8") as fh_codes:
@@ -150,7 +136,7 @@ def main():
             fh_codes.write(f"{name}\t{code}\n")
 
     print(f"Sequences renamed successfully. Output saved to {out_fasta}.")
-    print(f"Map to species scientifique names and species code saved to {out_codes}.")
+    print(f"Map to species scientific names and species code saved to {out_codes}.")
 
 if __name__ == "__main__":
     main()

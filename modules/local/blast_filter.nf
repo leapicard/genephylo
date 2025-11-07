@@ -2,10 +2,10 @@ process BLAST_FILTER {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "conda-forge::biopython=1.76"
+    conda "conda-forge::ete3==3.1.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.76--1' :
-        'quay.io/biocontainers/biopython:1.76--1' }"
+        'https://depot.galaxyproject.org/singularity/ete3:3.1.2' :
+        'quay.io/biocontainers/ete3:3.1.2' }"
 
     input:
     tuple val(meta), path(fasta)
@@ -22,11 +22,11 @@ process BLAST_FILTER {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --workdir "${task.workDir}" --threads ${task.cpus}
+    rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | cut -d' ' -f2)
+        ete3: \$(ete3 version | cut -d' ' -f1)
     END_VERSIONS
     """
 }

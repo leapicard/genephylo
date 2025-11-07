@@ -1,7 +1,15 @@
+
 #!/usr/bin/env python3
 import argparse
 import os
-from ete3 import NCBITaxa
+
+# Set ETE3PATH before importing ete3
+ete3_path = os.path.join(os.getcwd(), ".etetoolkit")
+os.makedirs(ete3_path, exist_ok=True)
+os.environ["ETE3PATH"] = ete3_path
+
+from ete3 import NCBITax
+
 
 # ----- Helpers -----
 def load_taxid_map(path):
@@ -73,13 +81,6 @@ def main():
     parser.add_argument("--input", required=True, help="Input FASTA file")
     parser.add_argument("--prefix", required=True, help="Output prefix for renamed FASTA and species codes")
     args = parser.parse_args()
-
-    # Define a custom writable path for ETE3 database
-    ete3_path = os.path.join(os.getcwd(), ".etetoolkit")
-    os.makedirs(ete3_path, exist_ok=True)
-
-    # Set the environment variable so ETE3 uses this path
-    os.environ["ETE3PATH"] = ete3_path
 
     out_fasta = f"{args.prefix}_renamed.fasta"
     out_codes = f"{args.prefix}_speciescodes.txt"

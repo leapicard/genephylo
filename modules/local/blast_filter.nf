@@ -19,6 +19,10 @@ process BLAST_FILTER {
     when:
     task.ext.when == null || task.ext.when
 
+    env:
+    XDG_CACHE_HOME = "\$PWD/.cache"
+    HOME = "\$PWD"
+
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """

@@ -19,7 +19,7 @@ process BLAST_FILTER {
     when:
     task.ext.when == null || task.ext.when
 
-    beforeScript 'export XDG_CONFIG_HOME=$PWD/.config'
+    beforeScript 'export XDG_CONFIG_HOME=${task.workDir}/.config'
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"

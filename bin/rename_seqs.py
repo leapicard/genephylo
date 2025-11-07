@@ -69,7 +69,13 @@ def main():
     args = parser.parse_args()
 
     if args.workdir:
-        DataHandler.local_dtd_dir = args.workdir
+        dtd_dir = os.path.join(args.workdir, "dtds")
+        os.makedirs(dtd_dir, exist_ok=True)
+        # Copy DTD files from Biopython installation
+        src_dtd_dir = os.path.join(os.path.dirname(Bio.__file__), "Entrez", "DTDs")
+        for fname in os.listdir(src_dtd_dir):
+            shutil.copy(os.path.join(src_dtd_dir, fname), dtd_dir)
+        DataHandler.local_dtd_dir = dtd_dir
 
     # Configure Entrez
     Entrez.email = args.email or ""

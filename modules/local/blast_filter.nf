@@ -2,10 +2,10 @@ process BLAST_FILTER {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "conda-forge::biopython=1.86"
+    conda "conda-forge::biopython=1.76"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.86--py311h38be061_0' :
-        'quay.io/biocontainers/biopython:1.86--py311h38be061_0' }"
+        'https://depot.galaxyproject.org/singularity/biopython:1.76--1' :
+        'quay.io/biocontainers/biopython:1.76--1' }"
 
     input:
     tuple val(meta), path(fasta)

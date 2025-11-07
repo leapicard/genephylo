@@ -22,7 +22,7 @@ process BLAST_FILTER {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    python rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --threads ${task.cpus}
+    rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --threads ${task.cpus}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

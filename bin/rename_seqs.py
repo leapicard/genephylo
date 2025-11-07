@@ -52,7 +52,7 @@ def make_code(scname):
     return "".join(toks)[:6].upper()
 
 def fetch_taxid_to_name_ete3(taxids, dbpath):
-    ncbi = NCBITaxa(dbfile = f"{dbpath+}/taxa.sqlite")
+    ncbi = NCBITaxa(dbfile = f"{dbpath}/taxa.sqlite")
     return ncbi.get_taxid_translator(taxids)
 
 # ----- Main -----

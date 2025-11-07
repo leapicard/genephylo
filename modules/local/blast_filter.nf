@@ -29,7 +29,7 @@ process BLAST_FILTER {
     # Create necessary directories
     #mkdir -p .cache .etetoolkit
 
-    rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --workdir "${task.workDir}"
+    rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --workdir \$PWD
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

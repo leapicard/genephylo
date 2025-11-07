@@ -3,6 +3,7 @@ import argparse
 import time
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import Bio
 from Bio import SeqIO, Entrez
 from Bio.Entrez.Parser import DataHandler
 

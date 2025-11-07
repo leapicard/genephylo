@@ -24,7 +24,7 @@ process EXTRACT_ACCESSIONS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        gawk version: \$(gawk --version | head -n 1 | cut -d',' -f1 | cut -d' ' -f3)
+        gawk: \$(gawk --version | head -n 1 | cut -d',' -f1 | cut -d' ' -f3)
     END_VERSIONS
     """
 }

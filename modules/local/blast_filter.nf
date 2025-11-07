@@ -19,7 +19,7 @@ process BLAST_FILTER {
     when:
     task.ext.when == null || task.ext.when
 
-    beforeScript 'export XDG_CONFIG_HOME=${task.workDir}/.config'
+    beforeScript "export XDG_CONFIG_HOME=${task.workDir}/.config"
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -28,7 +28,7 @@ process BLAST_FILTER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        Python version: \$(python --version | cut -d' ' -f2)
+        python: \$(python --version | cut -d' ' -f2)
     END_VERSIONS
     """
 }

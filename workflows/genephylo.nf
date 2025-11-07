@@ -161,13 +161,13 @@ workflow GENEPHYLO {
 		ch_iqtree_out = IQTREE.out.phylogeny
 		ch_versions = ch_versions.mix(IQTREE.out.versions)
 
-		softwareVersionsToYAML(ch_versions)
-				.collectFile(
-						storeDir: "${params.outdir}/pipeline_info",
-						name: 'nf_core_'  +  'genephylo_software_'  + 'mqc_'  + 'versions.yml',
-						sort: true,
-						newLine: true
-				).set { ch_collated_versions }
+		// softwareVersionsToYAML(ch_versions)
+		// 		.collectFile(
+		// 				storeDir: "${params.outdir}/pipeline_info",
+		// 				name: 'nf_core_'  +  'genephylo_software_'  + 'mqc_'  + 'versions.yml',
+		// 				sort: true,
+		// 				newLine: true
+		// 		).set { ch_collated_versions }
 
 
 		emit:

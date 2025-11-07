@@ -11,7 +11,7 @@ include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
 // initial phylogeny
 include { BLAST_BLASTN } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_TBLASTN } from '../modules/nf-core/blast/tblastn/main'
-include { EXTRACT_ACCESSIONS } from '../modules/local/extract_accessions'
+include { BLAST_EXTRACT } from '../modules/local/blast_extract'
 include { BLAST_BLASTDBCMD } from '../modules/nf-core/blast/blastdbcmd/main'
 include { SEQKIT_RMDUP } from '../modules/nf-core/seqkit/rmdup/main'
 include { BLAST_FILTER } from '../modules/local/blast_filter'
@@ -47,7 +47,6 @@ workflow GENEPHYLO {
 		ch_blastdb = channel.empty()
 
 		// 1. download from ncbi databases (update)
-		// WORKS
 		if (params.blastdb_option == 'update') {
 
 			ch_blastdb_in = channel.of( tuple( [ id: "BLASTDB" ], params.blastdb_update ))
@@ -61,7 +60,6 @@ workflow GENEPHYLO {
 
 		}
 		// 2. build custom databases from sequences (build)
-		// WORKS on test database (not tested for downstream)
 		else if (params.blastdb_option == 'build') {
 
 			channel
@@ -76,7 +74,6 @@ workflow GENEPHYLO {
 
 		}
 		// 3. use existing database (current)
-		// WORKS
 		else if (params.blastdb_option == 'current') {
 
 			ch_blastdb = channel.of(tuple([ id: "BLASTDB" ], file(params.blastdb_dir) ))
@@ -101,9 +98,6 @@ workflow GENEPHYLO {
 
 		}
 		// 2. aa sequence: tblastn
-		// WORKS but no perc_identity as an internal parameter of tblastn
-		// might want to integrate it afterwards by adding pident to -outfmt 6 and then filtering with awk
-		// awk '$3 >= ${params.blast_identity}' results.tsv > filtered.tsv
 		else if ( params.blast_type == 'aa' ) {
 
 			BLAST_TBLASTN( ch_blast_in, ch_blastdb_in )
@@ -114,16 +108,15 @@ workflow GENEPHYLO {
 		}
 
 		// get the first column of the blast results file
-		EXTRACT_ACCESSIONS( ch_blast_out )
+		BLAST_EXTRACT( ch_blast_out )
 
-		ch_accessions_out = EXTRACT_ACCESSIONS.out.accessions
-		ch_versions = ch_versions.mix(EXTRACT_ACCESSIONS.out.versions)
+		ch_accessions_out = BLAST_EXTRACT.out.accessions
+		ch_versions = ch_versions.mix(BLAST_EXTRACT.out.versions)
 
 		ch_extract_in = ch_accessions_out.map { meta, batch_file ->
 			tuple(meta, null, batch_file)
 		}
 		
-		// WORKS
 		BLAST_BLASTDBCMD(ch_extract_in, ch_blastdb_in)
 
 		ch_extract_out = BLAST_BLASTDBCMD.out.fasta
@@ -151,7 +144,6 @@ workflow GENEPHYLO {
 		ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions)
 
 		// build phylogenetic tree
-		// seems to work if not too many sequences (change to ressources high in module?)
 		ch_iqtree_in = ch_mafft_out.map { meta, alignment -> tuple(meta, alignment, []) }
 
 		IQTREE (

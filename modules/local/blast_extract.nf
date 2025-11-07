@@ -1,4 +1,4 @@
-process EXTRACT_ACCESSIONS {
+process BLAST_EXTRACT {
     tag "$meta.id"
     label 'process_single'
 

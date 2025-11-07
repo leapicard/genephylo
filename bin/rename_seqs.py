@@ -51,10 +51,6 @@ def make_code(scname):
         return (toks[0][:3] + toks[1][:2] + toks[2][:1]).upper()
     return "".join(toks)[:6].upper()
 
-def fetch_taxid_to_name_ete3(taxids, dbpath):
-    ncbi = NCBITaxa(dbfile = f"{dbpath}/taxa.sqlite")
-    return ncbi.get_taxid_translator(taxids)
-
 # ----- Main -----
 def main():
     parser = argparse.ArgumentParser(description="Rename FASTA headers using taxid mapping and species codes (ETE3).")
@@ -64,7 +60,10 @@ def main():
     parser.add_argument("--workdir", required=True)
     args = parser.parse_args()
 
-    dbpath = args.workdir
+    dbpath = f"{args.workdir}/taxa.sqlite"
+    print(dbpath)
+    ncbi = NCBITaxa(dbfile = dbpath)
+    
     out_fasta = f"{args.prefix}_renamed.fasta"
     out_codes = f"{args.prefix}_speciescodes.txt"
 
@@ -81,7 +80,7 @@ def main():
             taxids_needed.add(tid)
         fasta_records.append((header, seq))
 
-    taxid_to_name = fetch_taxid_to_name_ete3([int(t) for t in taxids_needed if t.isdigit()], dbpath)
+    taxid_to_name = ncbi.get_taxid_translator([int(t) for t in taxids_needed if t.isdigit()])
 
     species_codes = {}
     seen_codes = {}

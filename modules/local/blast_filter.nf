@@ -31,9 +31,9 @@ process BLAST_FILTER {
 
     rename_seqs.py --taxidmap "$taxidmap" --input "$fasta" --prefix "${prefix}" --workdir \$PWD
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        ete3: \$(ete3 version | cut -d' ' -f1)
-    END_VERSIONS
+    #cat <<-END_VERSIONS > versions.yml
+    #"${task.process}":
+    #    ete3: \$(ete3 version | cut -d' ' -f1)
+    #END_VERSIONS
     """
 }

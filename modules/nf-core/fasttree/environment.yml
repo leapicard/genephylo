@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::fasttree=2.1.10
+  - bioconda::fasttree=2.2.0

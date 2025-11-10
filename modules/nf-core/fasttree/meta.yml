@@ -21,7 +21,7 @@ input:
       ontologies: []
 output:
   phylogeny:
-    - "*.tre":
+    - "*.tree":
         type: file
         description: A phylogeny in Newick format
         pattern: "*.{tre}"

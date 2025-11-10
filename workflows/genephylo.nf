@@ -145,24 +145,28 @@ workflow GENEPHYLO {
 		ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions)
 
 		// build phylogenetic tree
-		if ( params.tree_tool == "iqtree" ) {
-			ch_iqtree_in = ch_mafft_out.map { meta, alignment -> tuple(meta, alignment, []) }
+		FASTTREE ( ch_mafft_out )
 
-			IQTREE (
-				ch_iqtree_in, [], [], [], [], [], [], [], [], [], [], [], []
-				)
+		ch_fasttree_out = FASTTREE.out.phylogeny
+		ch_versions = ch_versions.mix(FASTTREE.out.versions)
+
+		ch_iqtree_in = ch_mafft_out
+			.join(ch_fasttree_out)
+			.map { meta, alignment, tree -> tuple(meta, alignment, tree) }
+
+		IQTREE (
+			ch_iqtree_in, [], [], [], [], [], [], [], [], [], [], [], []
+			)
+		
+		ch_iqtree_out = IQTREE.out.phylogeny
+		ch_versions = ch_versions.mix(IQTREE.out.versions)
+
+		// if ( params.tree_tool == "iqtree" ) {
 			
-			ch_iqtree_out = IQTREE.out.phylogeny
-			ch_versions = ch_versions.mix(IQTREE.out.versions)
-		}
-		else if ( params.tree_tool == "fasttree" ) {
-			ch_fasttree_in = ch_mafft_out.map { meta, alignment -> alignment }
-
-			FASTTREE ( ch_fasttree_in )
-
-			ch_fasttree_out = FASTTREE.out.phylogeny
-			ch_versions = ch_versions.mix(FASTTREE.out.versions)
-		}
+		// }
+		// else if ( params.tree_tool == "fasttree" ) {
+		// 	ch_fasttree_in = ch_mafft_out.map { meta, alignment -> alignment }
+		// }
 
 		softwareVersionsToYAML(ch_versions)
 				.collectFile(

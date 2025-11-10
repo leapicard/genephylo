@@ -145,7 +145,7 @@ workflow GENEPHYLO {
 		ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions)
 
 		// build phylogenetic tree
-		if ( params.tree_tool == "iqtree" ) (
+		if ( params.tree_tool == "iqtree" ) {
 			ch_iqtree_in = ch_mafft_out.map { meta, alignment -> tuple(meta, alignment, []) }
 
 			IQTREE (
@@ -154,16 +154,15 @@ workflow GENEPHYLO {
 			
 			ch_iqtree_out = IQTREE.out.phylogeny
 			ch_versions = ch_versions.mix(IQTREE.out.versions)
-		)
-		else if ( params.tree_tool == "fasttree" ) (
+		}
+		else if ( params.tree_tool == "fasttree" ) {
 			ch_fasttree_in = ch_mafft_out.map { meta, alignment -> alignment }
 
 			FASTTREE ( ch_fasttree_in )
 
 			ch_fasttree_out = FASTTREE.out.phylogeny
 			ch_versions = ch_versions.mix(FASTTREE.out.versions)
-
-		)
+		}
 
 		softwareVersionsToYAML(ch_versions)
 				.collectFile(

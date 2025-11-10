@@ -19,6 +19,7 @@ include { BLAST_FILTER } from '../modules/local/blast_filter'
 // ALIGN AND TREE
 include { MAFFT_ALIGN } from '../modules/nf-core/mafft/align/main'
 include { IQTREE } from '../modules/nf-core/iqtree/main'
+include { FASTTREE } from '../modules/nf-core/fasttree/main'
 
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -144,14 +145,25 @@ workflow GENEPHYLO {
 		ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions)
 
 		// build phylogenetic tree
-		ch_iqtree_in = ch_mafft_out.map { meta, alignment -> tuple(meta, alignment, []) }
+		if ( params.tree_tool == "iqtree" ) (
+			ch_iqtree_in = ch_mafft_out.map { meta, alignment -> tuple(meta, alignment, []) }
 
-		IQTREE (
-			ch_iqtree_in, [], [], [], [], [], [], [], [], [], [], [], []
-			)
+			IQTREE (
+				ch_iqtree_in, [], [], [], [], [], [], [], [], [], [], [], []
+				)
+			
+			ch_iqtree_out = IQTREE.out.phylogeny
+			ch_versions = ch_versions.mix(IQTREE.out.versions)
+		)
+		else if ( params.tree_tool == "fasttree" ) (
+			ch_fasttree_in = ch_mafft_out.map { meta, alignment -> alignment }
 
-		ch_iqtree_out = IQTREE.out.phylogeny
-		ch_versions = ch_versions.mix(IQTREE.out.versions)
+			FASTTREE ( ch_fasttree_in )
+
+			ch_fasttree_out = FASTTREE.out.phylogeny
+			ch_versions = ch_versions.mix(FASTTREE.out.versions)
+
+		)
 
 		softwareVersionsToYAML(ch_versions)
 				.collectFile(

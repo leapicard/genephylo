@@ -19,7 +19,7 @@ process FASTTREE {
     script:
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}"
-    def alignment    = alignment       ? "-nt ${alignment})" : ''
+    def alignment    = alignment       ? "-nt ${alignment}" : ''
     """
     fasttree \\
         $args \\
@@ -36,7 +36,7 @@ process FASTTREE {
     stub:
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}"
-    def alignment    = alignment       ? "-nt ${alignment})" : ''
+    def alignment    = alignment       ? "-nt ${alignment}" : ''
     """
     touch ${prefix}.tree
 

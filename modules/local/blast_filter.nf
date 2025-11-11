@@ -12,7 +12,7 @@ process BLAST_FILTER {
     tuple val(meta2), path(taxidmap)
 
     output:
-    tuple val(meta), path("*_renamed.fasta"), emit: fasta
+    tuple val(meta), path("*_filtered.fasta"), emit: fasta
     tuple val(meta2), path("*_speciescodes.txt"), emit: txt
     path "versions.yml", emit: versions
 

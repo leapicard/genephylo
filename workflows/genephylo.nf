@@ -154,12 +154,13 @@ workflow GENEPHYLO {
 			.join(ch_fasttree_out)
 			.map { meta, alignment, tree -> tuple(meta, alignment, tree) }
 
-		IQTREE (
-			ch_iqtree_in, [], [], [], [], [], [], [], [], [], [], [], []
-			)
+		// Don't keep before reconciliation (too many gaps in aln before correct attribution of orthologous groups)
+		// IQTREE (
+		// 	ch_iqtree_in, [], [], [], [], [], [], [], [], [], [], [], []
+		// 	)
 		
-		ch_iqtree_out = IQTREE.out.phylogeny
-		ch_versions = ch_versions.mix(IQTREE.out.versions)
+		// ch_iqtree_out = IQTREE.out.phylogeny
+		// ch_versions = ch_versions.mix(IQTREE.out.versions)
 
 		// if ( params.tree_tool == "iqtree" ) {
 			

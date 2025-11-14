@@ -123,7 +123,9 @@ workflow GENEPHYLO {
 		ETE_TAXDB()
 		ch_versions = ch_versions.mix(ETE_TAXDB.out.versions)
 
-		ETE_FILTER(ch_rmdup, ch_blast_out)
+		if (ETE_TAXDB.out.log) {
+			ETE_FILTER(ch_rmdup, ch_blast_out)
+		}
 		ch_aln_in = ETE_FILTER.out.fasta
 		ch_versions = ch_versions.mix(ETE_FILTER.out.versions)
 

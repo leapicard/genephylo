@@ -127,6 +127,7 @@ workflow GENEPHYLO {
 		ch_aln_in = ETE_FILTER.out.fasta
 		ch_versions = ch_versions.mix(ETE_FILTER.out.versions)
 
+		//
 		// SUBWORKFLOW: phylo
 		//
 

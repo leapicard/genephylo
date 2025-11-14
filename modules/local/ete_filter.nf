@@ -1,6 +1,6 @@
 process ETE_FILTER {
     tag "$meta.id"
-    label 'process_medium'
+    label 'process_low'
 
     conda "conda-forge::ete3==3.1.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

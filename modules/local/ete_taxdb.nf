@@ -8,7 +8,6 @@ process ETE_TAXDB {
         'quay.io/biocontainers/ete3:3.1.2' }"
 
     output:
-    path "taxdb_update.done"
     path "versions.yml", emit: versions
 
     when:
@@ -26,7 +25,6 @@ process ETE_TAXDB {
     mkdir -p .local/share .config .cache .etetoolkit
 
     python -c "from ete3 import NCBITaxa; NCBITaxa().update_taxonomy_database()"
-    echo "ETE3 taxonomy database updated on $(date -u)" > taxdb_update.done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

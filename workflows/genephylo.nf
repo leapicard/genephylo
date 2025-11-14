@@ -119,13 +119,13 @@ workflow GENEPHYLO {
 		SEQKIT_RMDUP(ch_extract_out)
 		ch_rmdup = SEQKIT_RMDUP.out.fastx
 		ch_versions = ch_versions.mix(SEQKIT_RMDUP.out.versions)
-
+		
 		ETE_TAXDB()
 		ch_versions = ch_versions.mix(ETE_TAXDB.out.versions)
-
-		if (ETE_TAXDB.out.log) {
-			ETE_FILTER(ch_rmdup, ch_blast_out)
-		}
+		taxdb_ready = ETE_TAXDB.out.versions.map { true }
+		
+		ETE_FILTER(ch_rmdup, ch_blast_out)
+		
 		ch_aln_in = ETE_FILTER.out.fasta
 		ch_versions = ch_versions.mix(ETE_FILTER.out.versions)
 

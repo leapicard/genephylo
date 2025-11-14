@@ -17,7 +17,7 @@ process ETE_FILTER {
     path "versions.yml", emit: versions
 
     when:
-    task.ext.when == null || task.ext.when
+    taxdb_ready
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"

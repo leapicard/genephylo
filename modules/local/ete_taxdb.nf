@@ -1,5 +1,4 @@
 process ETE_TAXDB {
-    tag "$meta.id"
     label 'process_low'
 
     conda "conda-forge::ete3==3.1.2"

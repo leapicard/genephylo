@@ -122,9 +122,9 @@ workflow GENEPHYLO {
 		
 		ETE_TAXDB()
 		ch_versions = ch_versions.mix(ETE_TAXDB.out.versions)
-		taxdb_ready = ETE_TAXDB.out.versions.map { true }
-		
-		ETE_FILTER(ch_rmdup, ch_blast_out)
+		taxdb_ready = ETE_TAXDB.out.ready
+
+		ETE_FILTER(ch_rmdup, ch_blast_out, taxdb_ready)
 		
 		ch_aln_in = ETE_FILTER.out.fasta
 		ch_versions = ch_versions.mix(ETE_FILTER.out.versions)

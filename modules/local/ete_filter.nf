@@ -10,6 +10,7 @@ process ETE_FILTER {
     input:
     tuple val(meta), path(fasta)
     tuple val(meta2), path(taxidmap)
+    val(taxdb_ready)
 
     output:
     tuple val(meta), path("*_filtered.fasta"), emit: fasta
@@ -17,7 +18,7 @@ process ETE_FILTER {
     path "versions.yml", emit: versions
 
     when:
-    taxdb_ready
+    taxdb_ready == true
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"

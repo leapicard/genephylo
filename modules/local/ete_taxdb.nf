@@ -7,7 +7,7 @@ process ETE_TAXDB {
         'quay.io/biocontainers/ete3:3.1.2' }"
 
     output:
-    //path "taxdb.log"    , emit: log
+    val true            , emit: ready
     path "versions.yml" , emit: versions
 
     when:

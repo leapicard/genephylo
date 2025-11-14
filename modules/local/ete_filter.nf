@@ -1,4 +1,4 @@
-process BLAST_FILTER {
+process ETE_FILTER {
     tag "$meta.id"
     label 'process_medium'
 

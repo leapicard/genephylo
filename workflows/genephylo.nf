@@ -14,7 +14,8 @@ include { BLAST_TBLASTN } from '../modules/nf-core/blast/tblastn/main'
 include { BLAST_EXTRACT } from '../modules/local/blast_extract'
 include { BLAST_BLASTDBCMD } from '../modules/nf-core/blast/blastdbcmd/main'
 include { SEQKIT_RMDUP } from '../modules/nf-core/seqkit/rmdup/main'
-include { BLAST_FILTER } from '../modules/local/blast_filter'
+include { ETE_TAXDB } from '../modules/local/ete_taxdb'
+include { ETE_FILTER } from '../modules/local/ete_filter'
 
 // ALIGN AND TREE
 include { MAFFT_ALIGN } from '../modules/nf-core/mafft/align/main'
@@ -53,9 +54,6 @@ workflow GENEPHYLO {
 			ch_blastdb_in = channel.of( tuple( [ id: "BLASTDB" ], params.blastdb_update ))
 
 			BLAST_UPDATEBLASTDB( ch_blastdb_in )
-			
-			// decompression step added through modules.config
-
 			ch_blastdb = BLAST_UPDATEBLASTDB.out.db
 			ch_versions = ch_versions.mix(BLAST_UPDATEBLASTDB.out.versions)
 
@@ -69,7 +67,6 @@ workflow GENEPHYLO {
 				.set { ch_blastdb_in }
 
 			BLAST_MAKEBLASTDB( ch_blastdb_in )
-
 			ch_blastdb = BLAST_MAKEBLASTDB.out.db
 			ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
@@ -93,7 +90,6 @@ workflow GENEPHYLO {
 		if ( params.blast_type == 'nt' ) {
 
 			BLAST_BLASTN( ch_blast_in, ch_blastdb_in )
-
 			ch_blast_out = BLAST_BLASTN.out.txt
 			ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
 
@@ -102,7 +98,6 @@ workflow GENEPHYLO {
 		else if ( params.blast_type == 'aa' ) {
 
 			BLAST_TBLASTN( ch_blast_in, ch_blastdb_in )
-
 			ch_blast_out = BLAST_TBLASTN.out.txt
 			ch_versions = ch_versions.mix(BLAST_TBLASTN.out.versions)
 
@@ -110,7 +105,6 @@ workflow GENEPHYLO {
 
 		// get the first column of the blast results file
 		BLAST_EXTRACT( ch_blast_out )
-
 		ch_accessions_out = BLAST_EXTRACT.out.accessions
 		ch_versions = ch_versions.mix(BLAST_EXTRACT.out.versions)
 
@@ -119,19 +113,19 @@ workflow GENEPHYLO {
 		}
 		
 		BLAST_BLASTDBCMD(ch_extract_in, ch_blastdb_in)
-
 		ch_extract_out = BLAST_BLASTDBCMD.out.fasta
 		ch_versions = ch_versions.mix(BLAST_BLASTDBCMD.out.versions)
 
 		SEQKIT_RMDUP(ch_extract_out)
-
 		ch_rmdup = SEQKIT_RMDUP.out.fastx
 		ch_versions = ch_versions.mix(SEQKIT_RMDUP.out.versions)
 
-		BLAST_FILTER(ch_rmdup, ch_blast_out)
+		ETE_TAXDB()
+		ch_versions = ch_versions.mix(ETE_TAXDB.out.versions)
 
-		ch_aln_in = BLAST_FILTER.out.fasta
-		ch_versions = ch_versions.mix(BLAST_FILTER.out.versions)
+		ETE_FILTER(ch_rmdup, ch_blast_out)
+		ch_aln_in = ETE_FILTER.out.fasta
+		ch_versions = ch_versions.mix(ETE_FILTER.out.versions)
 
 		// SUBWORKFLOW: phylo
 		//
